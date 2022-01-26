@@ -19,7 +19,7 @@ var (
 
     instanceServiceClient = &http.Transport{}
 
-    tokenUrl = "/latest/api/token"
+    token = ""
 )
 
 var (
@@ -234,13 +234,13 @@ func newContainerService(platform string) (containerService, error) {
 func fetchMetadataToken() (string, error) {
     client := &http.Client{}
     var token = ""
-    req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%s%s", *metadataURL, tokenUrl), nil)
+    req, err := http.NewRequest(http.MethodPut, "http://169.254.169.254/latest/api/token", nil)
     if err != nil {
         log.Error("Error making request for fetching metadata token: ", err)
         return "", err
     }
     defer req.Body.Close()
-    req.Header.Add("X-aws-ec2-metadata-token-ttl-seconds", "300")
+    req.Header.Add("X-aws-ec2-metadata-token-ttl-seconds", "21600")
     resp, _ := client.Do(req)
     defer resp.Body.Close()
     if resp.StatusCode == http.StatusOK {
@@ -251,6 +251,10 @@ func fetchMetadataToken() (string, error) {
         token = string(bodyBytes)
     }
     return token, nil
+}
+
+func init() {
+    token, _ = fetchMetadataToken()
 }
 
 func main() {
@@ -271,7 +275,6 @@ func main() {
 
     // Proxy non-credentials requests to primary metadata service
     http.HandleFunc("/", logHandler(func(w http.ResponseWriter, r *http.Request) {
-        token, _ := fetchMetadataToken()
         match := credsRegex.FindStringSubmatch(r.URL.Path)
         if match != nil {
             handleCredentials(*metadataURL, match[1], match[2], credentials, w, r)
