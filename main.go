@@ -18,6 +18,8 @@ var (
 	credsRegex = regexp.MustCompile("^/(.+?)/meta-data/iam/security-credentials/(.*)$")
 
 	instanceServiceClient = &http.Transport{}
+
+	client = &http.Client{}
 )
 
 var (
@@ -157,8 +159,10 @@ func logHandler(handler func(w http.ResponseWriter, r *http.Request)) func(w htt
 func newGET(path string) *http.Request {
 	r, err := http.NewRequest("GET", path, nil)
 	token, _ := fetchMetadataToken()
+	log.Info("newGet fetchMetadataToken: ", token)
 	r.Header.Set("X-aws-ec2-metadata-token", token)
 	if err != nil {
+		log.Warn("Panic in token new request: ", err)
 		panic(err)
 	}
 
@@ -232,7 +236,6 @@ func newContainerService(platform string) (containerService, error) {
 
 func fetchMetadataToken() (string, error) {
 	var token = ""
-	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPut, "http://169.254.169.254/latest/api/token", nil)
 	if err != nil {
 		log.Error("Error making request for fetching metadata token: ", err)
