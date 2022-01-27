@@ -72,6 +72,27 @@ type metadataCredentials struct {
 	Expiration      time.Time
 }
 
+func fetchMetadataToken() (string, error) {
+	var token = ""
+	req, err := http.NewRequest(http.MethodPut, "http://169.254.169.254/latest/api/token", nil)
+	if err != nil {
+		log.Error("Error making request for fetching metadata token: ", err)
+		return "", err
+	}
+	defer req.Body.Close()
+	req.Header.Set("X-aws-ec2-metadata-token-ttl-seconds", "300")
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Error("Error reading response body from fetching metadata token: ", err)
+		}
+		token = string(bodyBytes)
+	}
+	return token, nil
+}
+
 func copyHeaders(dst, src http.Header) {
 	for k := range dst {
 		dst.Del(k)
@@ -158,9 +179,7 @@ func logHandler(handler func(w http.ResponseWriter, r *http.Request)) func(w htt
 
 func newGET(path string) *http.Request {
 	r, err := http.NewRequest("GET", path, nil)
-	token, _ := fetchMetadataToken()
-	log.Info("newGet fetchMetadataToken: ", token)
-	r.Header.Set("X-aws-ec2-metadata-token", token)
+
 	if err != nil {
 		log.Warn("Panic in token new request: ", err)
 		panic(err)
@@ -170,7 +189,10 @@ func newGET(path string) *http.Request {
 }
 
 func handleCredentials(baseURL, apiVersion, subpath string, c *credentialsProvider, w http.ResponseWriter, r *http.Request) {
-	resp, err := instanceServiceClient.RoundTrip(newGET(baseURL + "/" + apiVersion + "/meta-data/iam/security-credentials/"))
+	getReq := newGET(baseURL + "/" + apiVersion + "/meta-data/iam/security-credentials/")
+	token, _ := fetchMetadataToken()
+	getReq.Header.Set("X-aws-ec2-metadata-token", token)
+	resp, err := instanceServiceClient.RoundTrip(getReq)
 
 	if err != nil {
 		log.Error("Error requesting creds path for API version ", apiVersion, ": ", err)
@@ -232,27 +254,6 @@ func newContainerService(platform string) (containerService, error) {
 	default:
 		return nil, fmt.Errorf("Unknown container platform: %s", platform)
 	}
-}
-
-func fetchMetadataToken() (string, error) {
-	var token = ""
-	req, err := http.NewRequest(http.MethodPut, "http://169.254.169.254/latest/api/token", nil)
-	if err != nil {
-		log.Error("Error making request for fetching metadata token: ", err)
-		return "", err
-	}
-	defer req.Body.Close()
-	req.Header.Set("X-aws-ec2-metadata-token-ttl-seconds", "300")
-	resp, _ := client.Do(req)
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Error("Error reading response body from fetching metadata token: ", err)
-		}
-		token = string(bodyBytes)
-	}
-	return token, nil
 }
 
 func main() {
