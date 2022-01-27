@@ -275,7 +275,7 @@ func main() {
 	http.HandleFunc("/", logHandler(func(w http.ResponseWriter, r *http.Request) {
 		match := credsRegex.FindStringSubmatch(r.URL.Path)
 		if match != nil {
-			handleCredentials(*metadataURL, match[1], match[2], credentials, w, r)
+			handleCredentials("http://169.254.169.254", match[1], match[2], credentials, w, r)
 			return
 		}
 
