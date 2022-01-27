@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
@@ -70,27 +71,6 @@ type metadataCredentials struct {
 	SecretAccessKey string
 	Token           string
 	Expiration      time.Time
-}
-
-func fetchMetadataToken() (string, error) {
-	var token = ""
-	req, err := http.NewRequest(http.MethodPut, "http://169.254.169.254/latest/api/token", nil)
-	if err != nil {
-		log.Error("Error making request for fetching metadata token: ", err)
-		return "", err
-	}
-	defer req.Body.Close()
-	req.Header.Set("X-aws-ec2-metadata-token-ttl-seconds", "300")
-	resp, _ := client.Do(req)
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Error("Error reading response body from fetching metadata token: ", err)
-		}
-		token = string(bodyBytes)
-	}
-	return token, nil
 }
 
 func copyHeaders(dst, src http.Header) {
@@ -177,11 +157,32 @@ func logHandler(handler func(w http.ResponseWriter, r *http.Request)) func(w htt
 	}
 }
 
+func fetchMetadataToken() (string, error) {
+	var token = ""
+	req, err := http.NewRequest(http.MethodPut, "http://169.254.169.254/latest/api/token", nil)
+	if err != nil {
+		log.Error("Error making request for fetching metadata token: ", err)
+		return "", err
+	}
+	req.Header.Set("X-aws-ec2-metadata-token-ttl-seconds", "300")
+	resp, _ := client.Do(req)
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Error("Error reading response body from fetching metadata token: ", err)
+		}
+		token = string(bodyBytes)
+	}
+	defer resp.Body.Close()
+	return token, nil
+}
+
 func newGET(path string) *http.Request {
+	token, _ := fetchMetadataToken()
 	r, err := http.NewRequest("GET", path, nil)
+	r.Header.Set("X-aws-ec2-metadata-token", token)
 
 	if err != nil {
-		log.Warn("Panic in token new request: ", err)
 		panic(err)
 	}
 
@@ -189,15 +190,7 @@ func newGET(path string) *http.Request {
 }
 
 func handleCredentials(baseURL, apiVersion, subpath string, c *credentialsProvider, w http.ResponseWriter, r *http.Request) {
-	getReq := newGET(baseURL + "/" + apiVersion + "/meta-data/iam/security-credentials/")
-	token, err := fetchMetadataToken()
-	if err != nil {
-		log.Error("Error fetchMetadataToken ", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	getReq.Header.Set("X-aws-ec2-metadata-token", token)
-	resp, err := instanceServiceClient.RoundTrip(getReq)
+	resp, err := instanceServiceClient.RoundTrip(newGET(baseURL + "/" + apiVersion + "/meta-data/iam/security-credentials/"))
 
 	if err != nil {
 		log.Error("Error requesting creds path for API version ", apiVersion, ": ", err)
@@ -281,7 +274,7 @@ func main() {
 	http.HandleFunc("/", logHandler(func(w http.ResponseWriter, r *http.Request) {
 		match := credsRegex.FindStringSubmatch(r.URL.Path)
 		if match != nil {
-			handleCredentials("http://169.254.169.254", match[1], match[2], credentials, w, r)
+			handleCredentials(*metadataURL, match[1], match[2], credentials, w, r)
 			return
 		}
 
