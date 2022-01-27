@@ -190,7 +190,12 @@ func newGET(path string) *http.Request {
 
 func handleCredentials(baseURL, apiVersion, subpath string, c *credentialsProvider, w http.ResponseWriter, r *http.Request) {
 	getReq := newGET(baseURL + "/" + apiVersion + "/meta-data/iam/security-credentials/")
-	token, _ := fetchMetadataToken()
+	token, err := fetchMetadataToken()
+	if err != nil {
+		log.Error("Error fetchMetadataToken ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	getReq.Header.Set("X-aws-ec2-metadata-token", token)
 	resp, err := instanceServiceClient.RoundTrip(getReq)
 
