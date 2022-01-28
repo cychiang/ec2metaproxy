@@ -1,39 +1,58 @@
-module github.com/dump247/ec2metaproxy
+module github.com/cychiang/ec2metaproxy
 
 go 1.17
 
 require (
-	github.com/alecthomas/kingpin v2.1.12-0.20160512033542-30de531dd802+incompatible
-	github.com/aws/aws-sdk-go v1.2.4
-	github.com/cihub/seelog v0.0.0-20160620113837-752ef646ce43
-	github.com/flynn/flynn v0.0.0-20160708114458-15b40e354e51
-	github.com/fsouza/go-dockerclient v0.0.0-20160624230725-1a3d0cfd7814
-	github.com/stretchr/testify v1.1.4-0.20160615092844-d77da356e56a
+	github.com/alecthomas/kingpin v2.2.6+incompatible
+	github.com/aws/aws-sdk-go v1.42.43
+	github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575
+	github.com/flynn/flynn v0.0.0-20210904161739-c283e9f51589
+	github.com/fsouza/go-dockerclient v1.7.7
+	github.com/stretchr/testify v1.7.0
 )
 
 require (
-	github.com/Sirupsen/logrus v0.10.1-0.20160601113210-f3cfb454f4c2 // indirect
-	github.com/alecthomas/assert v1.0.0 // indirect
-	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
-	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
-	github.com/davecgh/go-spew v0.0.0-20151105211317-5215b55f46b2 // indirect
-	github.com/docker/docker v1.4.2-0.20160708131909-dd1a27ce2af1 // indirect
-	github.com/docker/engine-api v0.3.2-0.20160708123604-98348ad6f9c8 // indirect
-	github.com/docker/go-units v0.3.1 // indirect
-	github.com/flynn/go-check v0.0.0-20150613200214-592122021381 // indirect
-	github.com/go-ini/ini v1.17.1-0.20160702095645-927d8d7ced54 // indirect
-	github.com/hashicorp/go-cleanhttp v0.0.0-20160407174126-ad28ea4487f0 // indirect
-	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
-	github.com/jackc/pgx v2.8.2-0.20160707130326-1a4be31e7a81+incompatible // indirect
-	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
-	github.com/julienschmidt/httprouter v1.1.1-0.20160219154026-77366a47451a // indirect
-	github.com/mattn/go-colorable v0.0.5 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/opencontainers/runc v1.0.0-rc1.0.20160706165155-9d7831e41d3e // indirect
+	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
+	github.com/Microsoft/go-winio v0.5.1 // indirect
+	github.com/Microsoft/hcsshim v0.8.23 // indirect
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
+	github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 // indirect
+	github.com/containerd/cgroups v1.0.1 // indirect
+	github.com/containerd/containerd v1.5.9 // indirect
+	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/docker/docker v20.10.12+incompatible // indirect
+	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/docker/go-units v0.4.0 // indirect
+	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/godbus/dbus/v5 v5.0.4 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/golang/protobuf v1.5.0 // indirect
+	github.com/inconshreveable/log15 v0.0.0-20171019012758-0decfc6c20d9 // indirect
+	github.com/jackc/pgx v0.0.0-20160715195140-558d5550cf5c // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/jtacoma/uritemplates v1.0.0 // indirect
+	github.com/julienschmidt/httprouter v1.2.0 // indirect
+	github.com/mattn/go-colorable v0.0.9 // indirect
+	github.com/mattn/go-isatty v0.0.4 // indirect
+	github.com/moby/sys/mount v0.2.0 // indirect
+	github.com/moby/sys/mountinfo v0.4.1 // indirect
+	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
+	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/opencontainers/go-digest v1.0.0 // indirect
+	github.com/opencontainers/image-spec v1.0.2 // indirect
+	github.com/opencontainers/runc v1.0.3 // indirect
+	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/shopspring/decimal v1.3.1 // indirect
-	github.com/smartystreets/goconvey v1.7.2 // indirect
-	golang.org/x/net v0.0.0-20190311183353-d8887717615a // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
-	gopkg.in/inconshreveable/log15.v2 v2.0.0-20150921213854-b105bd37f74e // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/tent/canonical-json-go v0.0.0-20130607151641-96e4ba3a7613 // indirect
+	go.opencensus.io v0.22.3 // indirect
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f // indirect
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
+	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
+	google.golang.org/appengine v1.6.5 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
